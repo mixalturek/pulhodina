@@ -27,6 +27,7 @@
 
 import argparse
 import sys
+import os
 
 
 ###############################################################################
@@ -39,10 +40,7 @@ VERSION = '0.1.0-SNAPSHOT'
 ####
 
 def parse_arguments(argv):
-    """
-    Parse all command line arguments and return them in object form.
-    """
-
+    """Parse all command line arguments and return them in object form."""
     parser = argparse.ArgumentParser(
             prog=argv[0],
             description='Save half an hour to Zuzana',
@@ -85,14 +83,33 @@ def parse_arguments(argv):
 ###############################################################################
 ####
 
-def main(argv):
-    arguments = parse_arguments(argv)
-
+def debug_show_arguments(argv, arguments):
+    """Show parsed command line arguments if verbose is enabled."""
     if arguments.verbose:
         print("Raw arguments: {0}".format(argv))
         print("Verbose: {0}".format(arguments.verbose))
         print("Input directory: {0}".format(arguments.input_dir))
         print("Output directory: {0}".format(arguments.output_dir))
+
+
+###############################################################################
+####
+
+def get_files_in_directory(directory):
+    """Get names of files in a directory, non-recursive."""
+    files = [ f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) ]
+    return files
+
+
+###############################################################################
+####
+
+def main(argv):
+    """Application enter."""
+    arguments = parse_arguments(argv)
+    debug_show_arguments(argv, arguments)
+
+    files = get_files_in_directory(arguments.input_dir)
 
 
 ###############################################################################
