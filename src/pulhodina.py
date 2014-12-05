@@ -35,6 +35,8 @@ import re
 ####
 
 VERSION = '0.1.0-SNAPSHOT'
+INPUT_FILE_ENCODING='utf-16-le'
+OUTPUT_FILE_ENCODING='utf-8'
 
 
 ###############################################################################
@@ -99,15 +101,13 @@ def debug_show_arguments(argv, arguments):
 class VerySpecialHtmlFormatter(object):
     """Format table in a file to HTML form."""
 
-    def __init__(self, input_path, output_path):
+    def __init__(self):
         """Constructor."""
-        self.input_path = input_path
-        self.output_path = output_path
-
-
-    def format_and_save(self):
-        """Format the table to HTML and store the result."""
         pass
+
+    def format(self, lines):
+        """Apply tranformation and format lines to HTML table."""
+        return lines
 
 
 ###############################################################################
@@ -121,8 +121,25 @@ def get_files_in_directory(dir):
 ###############################################################################
 ####
 
-def format_table_in_files(args, file_names):
-    """Format all files in input directory very specially."""
+def format_one_file(input_path, output_path):
+    """Format a file very specially."""
+    with open(input_path, mode='r', encoding=INPUT_FILE_ENCODING) as fr:
+        input_lines = fr.readlines()
+
+    formatter = VerySpecialHtmlFormatter()
+    output_lines = formatter.format(input_lines)
+
+    with open(output_path, mode='w', encoding=OUTPUT_FILE_ENCODING) as fw:
+        for line in output_lines:
+            fw.write(line)
+            fw.write("\n")
+
+
+###############################################################################
+####
+
+def format_multiple_files(args, file_names):
+    """Format files very specially."""
     for file in file_names:
         input_path = os.path.join(args.input_dir, file)
         output_path = os.path.join(args.output_dir, file)
@@ -131,8 +148,7 @@ def format_table_in_files(args, file_names):
         if args.verbose:
             print("{0} -> {1}".format(input_path, output_path))
 
-        formatter = VerySpecialHtmlFormatter(input_path, output_path)
-        formatter.format_and_save()
+        format_one_file(input_path, output_path)
 
 
 ###############################################################################
@@ -144,7 +160,11 @@ def main(argv):
     debug_show_arguments(argv, args)
 
     file_names = get_files_in_directory(args.input_dir)
-    format_table_in_files(args, file_names)
+
+    if len(file_names) > 0:
+        # Only Python >= 3.4.1 is supported
+        os.makedirs(args.output_dir, mode=0o755, exist_ok=True)
+        format_multiple_files(args, file_names)
 
 
 ###############################################################################
