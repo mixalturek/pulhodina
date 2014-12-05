@@ -28,6 +28,7 @@
 import argparse
 import sys
 import os
+import re
 
 
 ###############################################################################
@@ -86,19 +87,52 @@ def parse_arguments(argv):
 def debug_show_arguments(argv, arguments):
     """Show parsed command line arguments if verbose is enabled."""
     if arguments.verbose:
-        print("Raw arguments: {0}".format(argv))
-        print("Verbose: {0}".format(arguments.verbose))
-        print("Input directory: {0}".format(arguments.input_dir))
+        print("Raw arguments:    {0}".format(argv))
+        print("Verbose:          {0}".format(arguments.verbose))
+        print("Input directory:  {0}".format(arguments.input_dir))
         print("Output directory: {0}".format(arguments.output_dir))
 
 
 ###############################################################################
 ####
 
-def get_files_in_directory(directory):
+class VerySpecialHtmlFormatter(object):
+    """Format table in a file to HTML form."""
+
+    def __init__(self, input_path, output_path):
+        """Constructor."""
+        self.input_path = input_path
+        self.output_path = output_path
+
+
+    def format_and_save(self):
+        """Format the table to HTML and store the result."""
+        pass
+
+
+###############################################################################
+####
+
+def get_files_in_directory(dir):
     """Get names of files in a directory, non-recursive."""
-    files = [ f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) ]
-    return files
+    return [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+
+
+###############################################################################
+####
+
+def format_table_in_files(args, file_names):
+    """Format all files in input directory very specially."""
+    for file in file_names:
+        input_path = os.path.join(args.input_dir, file)
+        output_path = os.path.join(args.output_dir, file)
+        output_path = re.sub(r'[^.]+$', 'html', output_path)
+
+        if args.verbose:
+            print("{0} -> {1}".format(input_path, output_path))
+
+        formatter = VerySpecialHtmlFormatter(input_path, output_path)
+        formatter.format_and_save()
 
 
 ###############################################################################
@@ -106,10 +140,11 @@ def get_files_in_directory(directory):
 
 def main(argv):
     """Application enter."""
-    arguments = parse_arguments(argv)
-    debug_show_arguments(argv, arguments)
+    args = parse_arguments(argv)
+    debug_show_arguments(argv, args)
 
-    files = get_files_in_directory(arguments.input_dir)
+    file_names = get_files_in_directory(args.input_dir)
+    format_table_in_files(args, file_names)
 
 
 ###############################################################################
