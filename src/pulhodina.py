@@ -265,6 +265,15 @@ class HtmlFormatter(object):
     <head>
         <meta charset="{0}">
         <title>Report</title>
+
+        <style>
+            body {{ font-size: 10pt; }}
+            table {{ border-collapse: collapse; text-align: center; }}
+            thead {{ background-color: yellow; }}
+            th, td {{ border: 1px solid black; padding: 0 0.5em 0 0.5em; }}
+            td:hover {{ background-color: #C0C0FF; }}
+            .space {{ height: 1em; }}
+        </style>
     </head>
     <body>
         <main>
@@ -294,7 +303,7 @@ class HtmlFormatter(object):
         """Write data."""
         for section in data.sections:
             self.write_section(fw, section)
-            fw.write("                    <tr></tr>\n")
+            fw.write("                    <tr class=\"space\"><td colspan=\"13\"></td></tr>\n")
 
 
     def write_section(self, fw, section):
