@@ -244,10 +244,10 @@ class HtmlFormatter(object):
                 saldo = receivables + special_liab
                 available = cred_limit - saldo + open_del
 
-                record.open_del   = locale.format("%f", open_del,   grouping=True)
-                record.saldo      = locale.format("%f", saldo,      grouping=True)
-                record.cred_limit = locale.format("%f", cred_limit, grouping=True)
-                record.available  = locale.format("%f", available,  grouping=True)
+                record.open_del   = locale.format("%f", open_del,   grouping=True).rstrip('0').rstrip('.')
+                record.saldo      = locale.format("%f", saldo,      grouping=True).rstrip('0').rstrip('.')
+                record.cred_limit = locale.format("%f", cred_limit, grouping=True).rstrip('0').rstrip('.')
+                record.available  = locale.format("%f", available,  grouping=True).rstrip('0').rstrip('.')
 
 
     def format(self, data, fw):
