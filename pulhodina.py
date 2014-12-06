@@ -339,9 +339,10 @@ class HtmlFormatter(object):
             self.write_cell(fw, first_row, rowspan, same_available,    record.available)
             self.write_cell(fw, first_row, rowspan, same_use,          record.use)
             self.write_cell(fw, first_row, rowspan, same_next_date,    record.next_date)
-            fw.write("                        <td></td>\n")
-            fw.write("                        <td></td>\n")
-            fw.write("                        <td></td>\n")
+
+            self.write_cell(fw, first_row, rowspan, True, '')
+            self.write_cell(fw, first_row, rowspan, True, '')
+            self.write_cell(fw, first_row, rowspan, True, '')
             fw.write("                    </tr>\n")
             first_row = False
 
