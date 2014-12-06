@@ -29,6 +29,8 @@ import argparse
 import sys
 import os
 import re
+import locale
+from decimal import *
 
 
 ###############################################################################
@@ -37,6 +39,7 @@ import re
 VERSION = '0.1.0-SNAPSHOT'
 INPUT_FILE_ENCODING='utf-16-le'
 OUTPUT_FILE_ENCODING='utf-8'
+LOCALE='en_US.UTF-8'
 RECORDS_DELIMITER="\t"
 
 
@@ -146,8 +149,18 @@ class Section(object):
         self.records.append(record)
 
     def is_empty(self):
-        """Is the section empty?"""
+        """Test if the section is empty"""
         return len(self.records) == 0
+
+    def is_same_values(self, param):
+        """Test if a parameter has the same value in all records."""
+        first = getattr(self.records[0], param)
+
+        for record in self.records[1:]:
+            if first != getattr(record, param):
+                return False
+
+        return True
 
 
 ###############################################################################
@@ -209,16 +222,135 @@ class Parser(object):
 ###############################################################################
 ####
 
-class VerySpecialHtmlFormatter(object):
+class HtmlFormatter(object):
     """Format table in a file to HTML form."""
 
     def __init__(self):
         """Constructor."""
         pass
 
-    def format(self, data_file):
+
+    def transform_in_place(self, data):
+        """Transform records data in place."""
+        locale.setlocale(locale.LC_ALL, LOCALE)
+
+        for section in data.sections:
+            for record in section.records:
+                open_del     = Decimal(record.open_del.replace(',', '')) * 1000
+                receivables  = Decimal(record.receivables.replace(',', ''))
+                special_liab = Decimal(record.special_liab.replace(',', ''))
+                cred_limit   = Decimal(record.cred_limit.replace(',', '')) * 1000
+
+                saldo = receivables + special_liab
+                available = cred_limit - saldo + open_del
+
+                record.open_del   = locale.format("%f", open_del,   grouping=True)
+                record.saldo      = locale.format("%f", saldo,      grouping=True)
+                record.cred_limit = locale.format("%f", cred_limit, grouping=True)
+                record.available  = locale.format("%f", available,  grouping=True)
+
+
+    def format(self, data, fw):
         """Apply tranformation and format data to HTML table."""
-        return str(data_file)
+        self.write_header(fw)
+        self.write_data(fw, data)
+        self.write_footer(fw)
+
+
+    def write_header(self, fw):
+        """Write HTML header."""
+        fw.write(
+'''<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="{0}">
+        <title>Report</title>
+    </head>
+    <body>
+        <main>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cred. acct</th>
+                        <th>Name 1</th>
+                        <th>PO Number</th>
+                        <th>Credit value</th>
+                        <th>Open del</th>
+                        <th>Saldo</th>
+                        <th>Cred.limit</th>
+                        <th>Available</th>
+                        <th>Use</th>
+                        <th>Next date</th>
+                        <th>Status</th>
+                        <th>Approver</th>
+                        <th>Accnt owner</th>
+                    </tr>
+                </thead>
+                <tbody>
+'''.format(OUTPUT_FILE_ENCODING.upper()))
+
+
+    def write_data(self, fw, data):
+        """Write data."""
+        for section in data.sections:
+            self.write_section(fw, section)
+            fw.write("                    <tr></tr>\n")
+
+
+    def write_section(self, fw, section):
+        """Write data of a section."""
+        first_row = True
+        rowspan = len(section.records)
+        same_cred_acct    = section.is_same_values('cred_acct')
+        same_name1        = section.is_same_values('name1')
+        same_po_number    = section.is_same_values('po_number')
+        same_credit_value = section.is_same_values('credit_value')
+        same_open_del     = section.is_same_values('open_del')
+        same_saldo        = section.is_same_values('saldo')
+        same_cred_limit   = section.is_same_values('cred_limit')
+        same_available    = section.is_same_values('available')
+        same_use          = section.is_same_values('use')
+        same_next_date    = section.is_same_values('next_date')
+
+        for record in section.records:
+            fw.write("                    <tr>\n")
+            self.write_cell(fw, first_row, rowspan, same_cred_acct,    record.cred_acct)
+            self.write_cell(fw, first_row, rowspan, same_name1,        record.name1)
+            self.write_cell(fw, first_row, rowspan, same_po_number,    record.po_number)
+            self.write_cell(fw, first_row, rowspan, same_credit_value, record.credit_value)
+            self.write_cell(fw, first_row, rowspan, same_open_del,     record.open_del)
+            self.write_cell(fw, first_row, rowspan, same_saldo,        record.saldo)
+            self.write_cell(fw, first_row, rowspan, same_cred_limit,   record.cred_limit)
+            self.write_cell(fw, first_row, rowspan, same_available,    record.available)
+            self.write_cell(fw, first_row, rowspan, same_use,          record.use)
+            self.write_cell(fw, first_row, rowspan, same_next_date,    record.next_date)
+            fw.write("                        <td></td>\n")
+            fw.write("                        <td></td>\n")
+            fw.write("                        <td></td>\n")
+            fw.write("                    </tr>\n")
+            first_row = False
+
+
+    def write_cell(self, fw, first_row, rowspan, same, value):
+        """Write value of one cell."""
+        if first_row and same:
+            fw.write("                        ")
+            fw.write("<td rowspan=\"{0}\">{1}</td>\n".format(rowspan, value))
+        elif not same:
+            fw.write("                        ")
+            fw.write("<td>{0}</td>\n".format(value))
+
+
+    def write_footer(self, fw):
+        """Write HTML footer."""
+        fw.write(
+'''
+                </tbody>
+            </table>
+        </main>
+    </body>
+</html>
+''')
 
 
 ###############################################################################
@@ -240,11 +372,11 @@ def format_one_file(input_path, output_path):
     parser = Parser()
     data_file = parser.parse(input_lines)
 
-    formatter = VerySpecialHtmlFormatter()
-    output = formatter.format(data_file)
+    formatter = HtmlFormatter()
+    formatter.transform_in_place(data_file)
 
     with open(output_path, mode='w', encoding=OUTPUT_FILE_ENCODING) as fw:
-        fw.write(output)
+        formatter.format(data_file, fw)
 
 
 ###############################################################################
