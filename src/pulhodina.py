@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
+# The MIT License (MIT)
+#
 # Copyright (c) 2014 Michal Turek
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,7 +38,10 @@ from decimal import *
 ###############################################################################
 ####
 
+APP_NAME = 'Půlhodina'
 VERSION = '0.1.0-SNAPSHOT'
+WEBSITE = 'https://github.com/mixalturek/pulhodina'
+
 INPUT_FILE_ENCODING='utf-16-le'
 OUTPUT_FILE_ENCODING='utf-8'
 LOCALE='en_US.UTF-8'
@@ -264,15 +269,16 @@ class HtmlFormatter(object):
 <html lang="en" dir="ltr">
     <head>
         <meta charset="{0}">
-        <title>Report</title>
+        <title>{1} Report</title>
 
         <style>
-            body {{ font-size: 10pt; }}
+            body {{ font-size: 10pt; font-family: sans-serif; }}
             table {{ border-collapse: collapse; text-align: center; }}
             thead {{ background-color: yellow; }}
             th, td {{ border: 1px solid black; padding: 0 0.5em 0 0.5em; }}
             td:hover {{ background-color: #C0C0FF; }}
             .space {{ height: 1em; }}
+            footer {{ margin: 2em 0 1em 0; }}
         </style>
     </head>
     <body>
@@ -296,7 +302,7 @@ class HtmlFormatter(object):
                     </tr>
                 </thead>
                 <tbody>
-'''.format(OUTPUT_FILE_ENCODING.upper()))
+'''.format(OUTPUT_FILE_ENCODING.upper(), APP_NAME))
 
 
     def write_data(self, fw, data):
@@ -357,9 +363,13 @@ class HtmlFormatter(object):
                 </tbody>
             </table>
         </main>
+        <footer>
+            The report was formatted using <a href="{2}">{0}</a> version {1}.
+            Feel free to contact the author and donate further development.
+        </footer>
     </body>
 </html>
-''')
+'''.format(APP_NAME, VERSION, WEBSITE))
 
 
 ###############################################################################
