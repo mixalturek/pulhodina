@@ -262,7 +262,7 @@ class HtmlFormatter(object):
 
     def write_header(self, fw):
         """Write HTML header."""
-        fw.write(
+        print(
 '''<!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
@@ -300,14 +300,14 @@ class HtmlFormatter(object):
                     </tr>
                 </thead>
                 <tbody>
-'''.format(FILES_ENCODING.upper(), APP_NAME))
+'''.format(FILES_ENCODING.upper(), APP_NAME), file=fw)
 
 
     def write_data(self, fw, data):
         """Write data."""
         for section in data.sections:
             self.write_section(fw, section)
-            fw.write("                    <tr class=\"space\"><td colspan=\"13\"></td></tr>\n")
+            print('                    <tr class="space"><td colspan="13"></td></tr>', file=fw)
 
 
     def write_section(self, fw, section):
@@ -326,7 +326,7 @@ class HtmlFormatter(object):
         same_next_date    = section.is_same_values('next_date')
 
         for record in section.records:
-            fw.write("                    <tr>\n")
+            print('                    <tr>', file=fw)
             self.write_cell(fw, first_row, rowspan, same_cred_acct,    record.cred_acct)
             self.write_cell(fw, first_row, rowspan, same_name1,        record.name1)
             self.write_cell(fw, first_row, rowspan, same_po_number,    record.po_number)
@@ -348,23 +348,21 @@ class HtmlFormatter(object):
 
             self.write_cell(fw, first_row, rowspan, same_cred_acct, owner)
 
-            fw.write("                    </tr>\n")
+            print('                    </tr>', file=fw)
             first_row = False
 
 
     def write_cell(self, fw, first_row, rowspan, same, value):
         """Write value of one cell."""
         if first_row and same:
-            fw.write("                        ")
-            fw.write("<td rowspan=\"{0}\">{1}</td>\n".format(rowspan, value))
+            print('                        <td rowspan="{0}">{1}</td>'.format(rowspan, value), file=fw)
         elif not same:
-            fw.write("                        ")
-            fw.write("<td>{0}</td>\n".format(value))
+            print('                        <td>{0}</td>'.format(value), file=fw)
 
 
     def write_footer(self, fw):
         """Write HTML footer."""
-        fw.write(
+        print(
 '''
                 </tbody>
             </table>
@@ -375,7 +373,7 @@ class HtmlFormatter(object):
         </footer>
     </body>
 </html>
-'''.format(APP_NAME, VERSION, WEBSITE))
+'''.format(APP_NAME, VERSION, WEBSITE), file=fw)
 
 
 ###############################################################################
