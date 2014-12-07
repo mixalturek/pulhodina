@@ -47,6 +47,7 @@ OUTPUT_FILE_ENCODING = 'utf-8'
 OWNERS_FILE_ENCODING = 'utf-8'
 LOCALE = 'en_US.UTF-8'
 RECORDS_DELIMITER = "\t"
+SAVED_MINUTES_PER_RUN = 30
 
 
 ###############################################################################
@@ -100,6 +101,14 @@ def parse_arguments(argv):
             required=True
     )
 
+    parser.add_argument(
+            '-c', '--counter',
+            metavar='FILE',
+            dest='counter_file',
+            help='file with counter of saved time',
+            required=False
+    )
+
     return parser.parse_args(argv[1:])
 
 
@@ -114,6 +123,7 @@ def debug_show_arguments(argv, arguments):
         print("Account owners:  ", arguments.owners_file)
         print("Input directory: ", arguments.input_dir)
         print("Output directory:", arguments.output_dir)
+        print("Counter file:  ", arguments.counter_file)
 
 
 ###############################################################################
@@ -463,6 +473,38 @@ def format_multiple_files(args, file_names):
 ###############################################################################
 ####
 
+def inc_saved_time(counter_file):
+    """Increment persisted counter of saved time and return the updated value."""
+    try:
+        with open(counter_file, mode='r', encoding=OWNERS_FILE_ENCODING) as fr:
+            saved_time = int(fr.read().strip())
+    except IOError as e:
+        print('WARNING:', e, file=sys.stderr)
+        saved_time = 0
+
+    saved_time += SAVED_MINUTES_PER_RUN
+
+    try:
+        with open(counter_file, mode='w', encoding=OWNERS_FILE_ENCODING) as fw:
+            print(saved_time, file=fw)
+    except IOError as e:
+        print('WARNING:', e, file=sys.stderr)
+
+    return saved_time
+
+
+###############################################################################
+####
+
+def prety_print_saved_time(saved_time):
+    """Prety print the saved time."""
+    print('INFO: Saved time today:', SAVED_MINUTES_PER_RUN, 'minutes')
+    print('INFO: Total saved time:', saved_time, 'minutes')
+
+
+###############################################################################
+####
+
 def main(argv):
     """Application enter."""
     args = parse_arguments(argv)
@@ -474,6 +516,10 @@ def main(argv):
         # Only Python >= 3.4.1 is supported
         os.makedirs(args.output_dir, mode=0o755, exist_ok=True)
         format_multiple_files(args, file_names)
+
+        if args.counter_file is not None:
+            saved_time = inc_saved_time(args.counter_file)
+            prety_print_saved_time(saved_time)
 
 
 ###############################################################################
