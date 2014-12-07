@@ -498,8 +498,26 @@ def inc_saved_time(counter_file):
 
 def prety_print_saved_time(saved_time):
     """Prety print the saved time."""
-    print('INFO: Saved time today:', SAVED_MINUTES_PER_RUN, 'minutes')
-    print('INFO: Total saved time:', saved_time, 'minutes')
+    print('Executions:', saved_time // SAVED_MINUTES_PER_RUN)
+    print('Saved time today:', SAVED_MINUTES_PER_RUN, 'minutes')
+
+    units   = ['years', 'months', 'days', 'hours', 'minutes']
+    factors = [12*30*24*60, 30*24*60, 24*60, 60, 1]
+
+    remainder = saved_time
+    pretty_total = []
+
+    for i in range(0, len(factors)):
+        if remainder == 0:
+            break
+
+        count = remainder // factors[i]
+        remainder = remainder % factors[i]
+
+        if count > 0:
+            pretty_total.append("{0} {1}".format(count, units[i]))
+
+    print('Total saved time:', saved_time, 'minutes', '(' + ', '.join(pretty_total) + ')')
 
 
 ###############################################################################
