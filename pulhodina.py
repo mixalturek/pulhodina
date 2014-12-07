@@ -36,7 +36,7 @@ from decimal import *
 
 ###############################################################################
 
-APP_NAME = 'Půlhodina'
+APP_NAME = 'Pulhodina'
 VERSION = '0.1.0-SNAPSHOT'
 WEBSITE = 'https://github.com/mixalturek/pulhodina'
 
@@ -236,7 +236,7 @@ class HtmlFormatter(object):
                 cred_limit   = Decimal(record.cred_limit.replace(',', '')) * 1000
 
                 saldo = receivables + special_liab
-                available = cred_limit - saldo + open_del
+                available = cred_limit - (saldo + open_del)
 
                 # ',' is thousands delimiter
                 record.open_del   = "{:,}".format(open_del).rstrip('0').rstrip('.')
