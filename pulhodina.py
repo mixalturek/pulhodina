@@ -32,6 +32,7 @@ import sys
 import os
 import re
 import locale
+import time
 from decimal import *
 
 
@@ -496,10 +497,11 @@ def inc_saved_time(counter_file):
 ###############################################################################
 ####
 
-def prety_print_saved_time(saved_time):
+def prety_print_saved_time(saved_time, elapsed_time):
     """Prety print the saved time."""
     print('Executions:', saved_time // SAVED_MINUTES_PER_RUN)
-    print('Saved time today:', SAVED_MINUTES_PER_RUN, 'minutes')
+    print('Execution time: {0:.2} ms'.format(elapsed_time))
+    print('Saved time:', SAVED_MINUTES_PER_RUN, 'minutes')
 
     units   = ['years', 'months', 'days', 'hours', 'minutes']
     factors = [12*30*24*60, 30*24*60, 24*60, 60, 1]
@@ -525,6 +527,9 @@ def prety_print_saved_time(saved_time):
 
 def main(argv):
     """Application enter."""
+    print(APP_NAME, VERSION)
+    start_time = time.time()
+
     args = parse_arguments(argv)
     debug_show_arguments(argv, args)
 
@@ -537,7 +542,8 @@ def main(argv):
 
         if args.counter_file is not None:
             saved_time = inc_saved_time(args.counter_file)
-            prety_print_saved_time(saved_time)
+            elapsed_time = time.time() - start_time
+            prety_print_saved_time(saved_time, elapsed_time)
 
 
 ###############################################################################
