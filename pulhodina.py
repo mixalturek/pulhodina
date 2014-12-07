@@ -43,8 +43,7 @@ VERSION = '0.1.0-SNAPSHOT'
 WEBSITE = 'https://github.com/mixalturek/pulhodina'
 
 INPUT_FILE_ENCODING = 'utf-16-le'
-OUTPUT_FILE_ENCODING = 'utf-8'
-OWNERS_FILE_ENCODING = 'utf-8'
+FILES_ENCODING = 'utf-8'
 RECORDS_DELIMITER = "\t"
 SAVED_MINUTES_PER_RUN = 30
 
@@ -322,7 +321,7 @@ class HtmlFormatter(object):
                     </tr>
                 </thead>
                 <tbody>
-'''.format(OUTPUT_FILE_ENCODING.upper(), APP_NAME))
+'''.format(FILES_ENCODING.upper(), APP_NAME))
 
 
     def write_data(self, fw, data):
@@ -422,7 +421,7 @@ def format_one_file(input_path, output_path, account_owners):
     formatter = HtmlFormatter(account_owners)
     formatter.transform_in_place(data_file)
 
-    with open(output_path, mode='w', encoding=OUTPUT_FILE_ENCODING) as fw:
+    with open(output_path, mode='w', encoding=FILES_ENCODING) as fw:
         formatter.format(data_file, fw)
 
 
@@ -434,7 +433,7 @@ def read_account_owners(owners_file):
     if owners_file is None:
         return dict()
 
-    with open(owners_file, mode='r', encoding=OWNERS_FILE_ENCODING) as fr:
+    with open(owners_file, mode='r', encoding=FILES_ENCODING) as fr:
         input_lines = fr.readlines()
 
     account_owners = dict()
@@ -474,7 +473,7 @@ def format_multiple_files(args, file_names):
 def inc_saved_time(counter_file):
     """Increment persisted counter of saved time and return the updated value."""
     try:
-        with open(counter_file, mode='r', encoding=OWNERS_FILE_ENCODING) as fr:
+        with open(counter_file, mode='r', encoding=FILES_ENCODING) as fr:
             saved_time = int(fr.read().strip())
     except IOError as e:
         print('WARNING:', e, file=sys.stderr)
@@ -483,7 +482,7 @@ def inc_saved_time(counter_file):
     saved_time += SAVED_MINUTES_PER_RUN
 
     try:
-        with open(counter_file, mode='w', encoding=OWNERS_FILE_ENCODING) as fw:
+        with open(counter_file, mode='w', encoding=FILES_ENCODING) as fw:
             print(saved_time, file=fw)
     except IOError as e:
         print('WARNING:', e, file=sys.stderr)
