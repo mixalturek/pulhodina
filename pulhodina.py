@@ -37,7 +37,7 @@ from decimal import *
 ###############################################################################
 
 APP_NAME = 'Pulhodina'
-VERSION = '0.1.0-SNAPSHOT'
+VERSION = '1.0'
 WEBSITE = 'https://github.com/mixalturek/pulhodina'
 
 INPUT_FILE_ENCODING = 'utf-16-le'
