@@ -42,10 +42,11 @@ APP_NAME = 'Půlhodina'
 VERSION = '0.1.0-SNAPSHOT'
 WEBSITE = 'https://github.com/mixalturek/pulhodina'
 
-INPUT_FILE_ENCODING='utf-16-le'
-OUTPUT_FILE_ENCODING='utf-8'
-LOCALE='en_US.UTF-8'
-RECORDS_DELIMITER="\t"
+INPUT_FILE_ENCODING = 'utf-16-le'
+OUTPUT_FILE_ENCODING = 'utf-8'
+OWNERS_FILE_ENCODING = 'utf-8'
+LOCALE = 'en_US.UTF-8'
+RECORDS_DELIMITER = "\t"
 
 
 ###############################################################################
@@ -55,7 +56,9 @@ def parse_arguments(argv):
     """Parse all command line arguments and return them in object form."""
     parser = argparse.ArgumentParser(
             prog=argv[0],
-            description='Save half an hour to Zuzana',
+            description='Format text/plain tab-delimited table with a very \
+                custom structure to HTML which is importable to MS Excel \
+                and OpenOffice/LibreOffice Calc.',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
@@ -71,6 +74,14 @@ def parse_arguments(argv):
             help='increase output verbosity',
             action='store_true',
             default=False
+    )
+
+    parser.add_argument(
+            '-w', '--owners',
+            metavar='FILE',
+            dest='owners_file',
+            help='file with tab-delimited accounts and their owners',
+            required=False
     )
 
     parser.add_argument(
@@ -100,6 +111,7 @@ def debug_show_arguments(argv, arguments):
     if arguments.verbose:
         print("Raw arguments:   ", argv)
         print("Verbose:         ", arguments.verbose)
+        print("Account owners:  ", arguments.owners_file)
         print("Input directory: ", arguments.input_dir)
         print("Output directory:", arguments.output_dir)
 
@@ -230,9 +242,9 @@ class Parser(object):
 class HtmlFormatter(object):
     """Format table in a file to HTML form."""
 
-    def __init__(self):
+    def __init__(self, account_owners):
         """Constructor."""
-        pass
+        self.account_owners = account_owners
 
 
     def transform_in_place(self, data):
@@ -342,7 +354,14 @@ class HtmlFormatter(object):
 
             self.write_cell(fw, first_row, rowspan, True, '')
             self.write_cell(fw, first_row, rowspan, True, '')
-            self.write_cell(fw, first_row, rowspan, True, '')
+
+            try:
+                owner = self.account_owners[record.cred_acct]
+            except KeyError as e:
+                owner = 'UNKNOWN'
+
+            self.write_cell(fw, first_row, rowspan, same_cred_acct, owner)
+
             fw.write("                    </tr>\n")
             first_row = False
 
@@ -384,7 +403,7 @@ def get_files_in_directory(dir):
 ###############################################################################
 ####
 
-def format_one_file(input_path, output_path):
+def format_one_file(input_path, output_path, account_owners):
     """Format a file very specially."""
     with open(input_path, mode='r', encoding=INPUT_FILE_ENCODING) as fr:
         input_lines = fr.readlines()
@@ -392,7 +411,7 @@ def format_one_file(input_path, output_path):
     parser = Parser()
     data_file = parser.parse(input_lines)
 
-    formatter = HtmlFormatter()
+    formatter = HtmlFormatter(account_owners)
     formatter.transform_in_place(data_file)
 
     with open(output_path, mode='w', encoding=OUTPUT_FILE_ENCODING) as fw:
@@ -402,8 +421,34 @@ def format_one_file(input_path, output_path):
 ###############################################################################
 ####
 
+def read_account_owners(owners_file):
+    """Read account owners from a file if it is defined."""
+    if owners_file is None:
+        return dict()
+
+    with open(owners_file, mode='r', encoding=OWNERS_FILE_ENCODING) as fr:
+        input_lines = fr.readlines()
+
+    account_owners = dict()
+
+    for line in input_lines:
+        parts = [part.strip() for part in line.split(RECORDS_DELIMITER)]
+
+        try:
+            account_owners[parts[0]] = parts[1]
+        except IndexError as e:
+            print("ERROR: Too less parts for account owner, skipping:", parts, file=sys.stderr)
+
+    return account_owners
+
+
+###############################################################################
+####
+
 def format_multiple_files(args, file_names):
     """Format files very specially."""
+    account_owners = read_account_owners(args.owners_file)
+
     for file in file_names:
         input_path = os.path.join(args.input_dir, file)
         output_path = os.path.join(args.output_dir, file)
@@ -412,7 +457,7 @@ def format_multiple_files(args, file_names):
         if args.verbose:
             print(input_path, "->", output_path)
 
-        format_one_file(input_path, output_path)
+        format_one_file(input_path, output_path, account_owners)
 
 
 ###############################################################################
@@ -439,3 +484,5 @@ if __name__ == "__main__":
         main(sys.argv)
     except KeyboardInterrupt as keyboard_exception:
         sys.exit('ERROR: Interrupted by user')
+    except FileNotFoundError as not_found_exception:
+        sys.exit('ERROR: ' + str(not_found_exception))
