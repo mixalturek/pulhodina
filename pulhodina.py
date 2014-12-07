@@ -69,13 +69,6 @@ def parse_arguments(argv):
     )
 
     parser.add_argument(
-            '-v', '--verbose',
-            help='increase output verbosity',
-            action='store_true',
-            default=False
-    )
-
-    parser.add_argument(
             '-w', '--owners',
             metavar='FILE',
             dest='owners_file',
@@ -108,20 +101,6 @@ def parse_arguments(argv):
     )
 
     return parser.parse_args(argv[1:])
-
-
-###############################################################################
-####
-
-def debug_show_arguments(argv, arguments):
-    """Show parsed command line arguments if verbose is enabled."""
-    if arguments.verbose:
-        print("Raw arguments:   ", argv)
-        print("Verbose:         ", arguments.verbose)
-        print("Account owners:  ", arguments.owners_file)
-        print("Input directory: ", arguments.input_dir)
-        print("Output directory:", arguments.output_dir)
-        print("Counter file:  ", arguments.counter_file)
 
 
 ###############################################################################
@@ -461,9 +440,6 @@ def format_multiple_files(args, file_names):
         output_path = os.path.join(args.output_dir, file)
         output_path = re.sub(r'[^.]+$', 'html', output_path)
 
-        if args.verbose:
-            print(input_path, "->", output_path)
-
         format_one_file(input_path, output_path, account_owners)
 
 
@@ -527,8 +503,6 @@ def main(argv):
     start_time = time.time()
 
     args = parse_arguments(argv)
-    debug_show_arguments(argv, args)
-
     file_names = get_files_in_directory(args.input_dir)
 
     if len(file_names) > 0:
