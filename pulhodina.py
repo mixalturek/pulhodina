@@ -31,7 +31,6 @@ import argparse
 import sys
 import os
 import re
-import locale
 import time
 from decimal import *
 
@@ -46,7 +45,6 @@ WEBSITE = 'https://github.com/mixalturek/pulhodina'
 INPUT_FILE_ENCODING = 'utf-16-le'
 OUTPUT_FILE_ENCODING = 'utf-8'
 OWNERS_FILE_ENCODING = 'utf-8'
-LOCALE = 'en_US.UTF-8'
 RECORDS_DELIMITER = "\t"
 SAVED_MINUTES_PER_RUN = 30
 
@@ -260,8 +258,6 @@ class HtmlFormatter(object):
 
     def transform_in_place(self, data):
         """Transform records data in place."""
-        locale.setlocale(locale.LC_ALL, LOCALE)
-
         for section in data.sections:
             for record in section.records:
                 open_del     = Decimal(record.open_del.replace(',', '')) * 1000
@@ -272,10 +268,11 @@ class HtmlFormatter(object):
                 saldo = receivables + special_liab
                 available = cred_limit - saldo + open_del
 
-                record.open_del   = locale.format("%f", open_del,   grouping=True).rstrip('0').rstrip('.')
-                record.saldo      = locale.format("%f", saldo,      grouping=True).rstrip('0').rstrip('.')
-                record.cred_limit = locale.format("%f", cred_limit, grouping=True).rstrip('0').rstrip('.')
-                record.available  = locale.format("%f", available,  grouping=True).rstrip('0').rstrip('.')
+                # ',' is thousands delimiter
+                record.open_del   = "{:,}".format(open_del).rstrip('0').rstrip('.')
+                record.saldo      = "{:,}".format(saldo).rstrip('0').rstrip('.')
+                record.cred_limit = "{:,}".format(cred_limit).rstrip('0').rstrip('.')
+                record.available  = "{:,}".format(available).rstrip('0').rstrip('.')
 
 
     def format(self, data, fw):
