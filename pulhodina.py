@@ -262,7 +262,7 @@ class HtmlFormatter(object):
         <title>{1} Report</title>
 
         <style>
-            body {{ font-size: 10pt; font-family: sans-serif; background-color: transparent; }}
+            body {{ font-size: 8pt; font-family: sans-serif; }}
             table {{ border-collapse: collapse; text-align: center; }}
             thead {{ background-color: yellow; }}
             th, td {{ border: 1px solid black; padding: 0 0.5em 0 0.5em; }}
