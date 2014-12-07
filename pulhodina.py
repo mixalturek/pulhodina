@@ -25,7 +25,6 @@
 #
 
 ###############################################################################
-####
 
 import argparse
 import sys
@@ -36,7 +35,6 @@ from decimal import *
 
 
 ###############################################################################
-####
 
 APP_NAME = 'Půlhodina'
 VERSION = '0.1.0-SNAPSHOT'
@@ -49,7 +47,6 @@ SAVED_MINUTES_PER_RUN = 30
 
 
 ###############################################################################
-####
 
 def parse_arguments(argv):
     """Parse all command line arguments and return them in object form."""
@@ -104,7 +101,6 @@ def parse_arguments(argv):
 
 
 ###############################################################################
-####
 
 class Record(object):
     """Data of a record."""
@@ -135,7 +131,6 @@ class Record(object):
 
 
 ###############################################################################
-####
 
 class Section(object):
     """Data stored in a section."""
@@ -168,7 +163,6 @@ class Section(object):
 
 
 ###############################################################################
-####
 
 class DataFile(object):
     """Data stored in a file."""
@@ -190,7 +184,6 @@ class DataFile(object):
 
 
 ###############################################################################
-####
 
 class Parser(object):
     """Parse input data to the internal representation."""
@@ -224,7 +217,6 @@ class Parser(object):
 
 
 ###############################################################################
-####
 
 class HtmlFormatter(object):
     """Format table in a file to HTML form."""
@@ -377,7 +369,6 @@ class HtmlFormatter(object):
 
 
 ###############################################################################
-####
 
 def get_files_in_directory(dir):
     """Get names of files in a directory, non-recursive."""
@@ -385,10 +376,9 @@ def get_files_in_directory(dir):
 
 
 ###############################################################################
-####
 
 def format_one_file(input_path, output_path, account_owners):
-    """Format a file very specially."""
+    """Format a file."""
     with open(input_path, mode='r', encoding=INPUT_FILE_ENCODING) as fr:
         input_lines = fr.readlines()
 
@@ -403,7 +393,6 @@ def format_one_file(input_path, output_path, account_owners):
 
 
 ###############################################################################
-####
 
 def read_account_owners(owners_file):
     """Read account owners from a file if it is defined."""
@@ -427,7 +416,6 @@ def read_account_owners(owners_file):
 
 
 ###############################################################################
-####
 
 def format_multiple_files(args, file_names):
     """Format files very specially."""
@@ -442,7 +430,6 @@ def format_multiple_files(args, file_names):
 
 
 ###############################################################################
-####
 
 def inc_saved_time(counter_file):
     """Increment persisted counter of saved time and return the updated value."""
@@ -465,7 +452,6 @@ def inc_saved_time(counter_file):
 
 
 ###############################################################################
-####
 
 def prety_print_saved_time(saved_time, elapsed_time):
     """Prety print the saved time."""
@@ -493,7 +479,6 @@ def prety_print_saved_time(saved_time, elapsed_time):
 
 
 ###############################################################################
-####
 
 def main(argv):
     """Application enter."""
@@ -515,7 +500,6 @@ def main(argv):
 
 
 ###############################################################################
-####
 
 if __name__ == "__main__":
     try:
