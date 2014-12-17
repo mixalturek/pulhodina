@@ -37,7 +37,7 @@ import decimal
 ###############################################################################
 
 APP_NAME = 'Pulhodina'
-VERSION = '1.1-SNAPSHOT'
+VERSION = '1.1'
 WEBSITE = 'https://github.com/mixalturek/pulhodina'
 
 INPUT_FILE_ENCODING = 'utf-16-le'
@@ -66,6 +66,21 @@ def parse_arguments(argv):
     )
 
     parser.add_argument(
+            '-m', '--mugabe',
+            help='enable mugabe mode',
+            action="store_true",
+            required=False
+    )
+
+    parser.add_argument(
+            '-c', '--counter',
+            metavar='FILE',
+            dest='counter_file',
+            help='file with counter of saved time',
+            required=False
+    )
+
+    parser.add_argument(
             '-w', '--owners',
             metavar='FILE',
             dest='owners_file',
@@ -87,21 +102,6 @@ def parse_arguments(argv):
             dest='output_dir',
             help='path to directory with output files',
             required=True
-    )
-
-    parser.add_argument(
-            '-c', '--counter',
-            metavar='FILE',
-            dest='counter_file',
-            help='file with counter of saved time',
-            required=False
-    )
-
-    parser.add_argument(
-            '-m', '--mugabe',
-            help='enable mugabe mode',
-            action="store_true",
-            required=False
     )
 
     return parser.parse_args(argv[1:])
