@@ -437,7 +437,10 @@ def inc_saved_time(counter_file):
         with open(counter_file, mode='r', encoding=FILES_ENCODING) as fr:
             saved_time = int(fr.read().strip())
     except IOError as e:
-        print('WARNING:', e, file=sys.stderr)
+        print('WARNING: Reading of saved time failed', e, file=sys.stderr)
+        saved_time = 0
+    except ValueError as e:
+        print('WARNING: Broken saved time', e, file=sys.stderr)
         saved_time = 0
 
     saved_time += SAVED_MINUTES_PER_RUN
@@ -446,7 +449,7 @@ def inc_saved_time(counter_file):
         with open(counter_file, mode='w', encoding=FILES_ENCODING) as fw:
             print(saved_time, file=fw)
     except IOError as e:
-        print('WARNING:', e, file=sys.stderr)
+        print('WARNING: Writing of saved time failed', e, file=sys.stderr)
 
     return saved_time
 
