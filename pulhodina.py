@@ -97,6 +97,13 @@ def parse_arguments(argv):
             required=False
     )
 
+    parser.add_argument(
+            '-m', '--mugabe',
+            help='enable mugabe mode',
+            action="store_true",
+            required=False
+    )
+
     return parser.parse_args(argv[1:])
 
 
@@ -221,9 +228,10 @@ class Parser(object):
 class HtmlFormatter(object):
     """Format table in a file to HTML form."""
 
-    def __init__(self, account_owners):
+    def __init__(self, account_owners, mugabe):
         """Constructor."""
         self.account_owners = account_owners
+        self.mugabe = mugabe
 
 
     def __parse_number(self, str):
@@ -304,7 +312,7 @@ class HtmlFormatter(object):
                     <tr>
                         <th>Cred. acct</th>
                         <th>Name 1</th>
-                        <th>PO Number</th>
+                        <th>{2}</th>
                         <th>Credit value</th>
                         <th>Open del</th>
                         <th>Saldo</th>
@@ -314,11 +322,16 @@ class HtmlFormatter(object):
                         <th>Next date</th>
                         <th>Status</th>
                         <th>Approver</th>
-                        <th>Accnt owner</th>
+                        {3}
                     </tr>
                 </thead>
                 <tbody>
-'''.format(FILES_ENCODING.upper(), APP_NAME), file=fw)
+'''.format(
+        FILES_ENCODING.upper(),
+        APP_NAME,
+        'Document' if self.mugabe else 'PO Number',
+        '' if self.mugabe else '<th>Accnt owner</th>'),
+        file=fw)
 
 
     def write_data(self, fw, data):
@@ -359,12 +372,13 @@ class HtmlFormatter(object):
             self.write_cell(fw, first_row, rowspan, True, '')
             self.write_cell(fw, first_row, rowspan, True, '')
 
-            try:
-                owner = self.account_owners[record.cred_acct]
-            except KeyError as e:
-                owner = 'UNKNOWN'
+            if not self.mugabe:
+                try:
+                    owner = self.account_owners[record.cred_acct]
+                except KeyError as e:
+                    owner = 'UNKNOWN'
 
-            self.write_cell(fw, first_row, rowspan, same_cred_acct, owner)
+                self.write_cell(fw, first_row, rowspan, same_cred_acct, owner)
 
             print('                    </tr>', file=fw)
             first_row = False
@@ -403,7 +417,7 @@ def get_files_in_directory(dir):
 
 ###############################################################################
 
-def format_one_file(input_path, output_path, account_owners):
+def format_one_file(input_path, output_path, account_owners, mugabe):
     """Format a file."""
     with open(input_path, mode='r', encoding=INPUT_FILE_ENCODING) as fr:
         input_lines = fr.readlines()
@@ -411,7 +425,7 @@ def format_one_file(input_path, output_path, account_owners):
     parser = Parser()
     data_file = parser.parse(input_lines)
 
-    formatter = HtmlFormatter(account_owners)
+    formatter = HtmlFormatter(account_owners, mugabe)
     formatter.transform_in_place(data_file)
 
     with open(output_path, mode='w', encoding=FILES_ENCODING) as fw:
@@ -456,7 +470,7 @@ def format_multiple_files(args, file_names):
         else:
             output_path = re.sub(r'[^.]+$', 'html', output_path)
 
-        format_one_file(input_path, output_path, account_owners)
+        format_one_file(input_path, output_path, account_owners, args.mugabe)
 
 
 ###############################################################################
