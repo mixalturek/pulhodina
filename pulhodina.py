@@ -31,7 +31,7 @@ import sys
 import os
 import re
 import time
-from decimal import *
+import decimal
 
 
 ###############################################################################
@@ -226,14 +226,40 @@ class HtmlFormatter(object):
         self.account_owners = account_owners
 
 
+    def __parse_number(self, str):
+        """Parse number with autodetection of its format."""
+        str = str.strip()
+
+        if re.match(r'^-?\d+$', str):
+            # 42
+            updated = str
+        elif re.match(r'^-?(\d+,)*\d+\.\d+$', str):
+            # 42.30
+            # 62,297.27
+            updated = str.replace(',', '')
+        elif re.match(r'^-?(\d+ )*\d+,\d+$', str):
+            # 42,30
+            # 62 297,27
+            updated = str.replace(' ', '').replace(',', '.')
+        else:
+            print('WARNING: Unrecognized number format:', str, file=sys.stderr)
+            updated = str
+
+        try:
+            return decimal.Decimal(updated)
+        except decimal.InvalidOperation as e:
+            print('ERROR: Parsing of decimal number failed, using -1 instead:', str, '->', updated, file=sys.stderr)
+            return decimal.Decimal(-1)
+
+
     def transform_in_place(self, data):
         """Transform records data in place."""
         for section in data.sections:
             for record in section.records:
-                open_del     = Decimal(record.open_del.replace(',', '')) * 1000
-                receivables  = Decimal(record.receivables.replace(',', ''))
-                special_liab = Decimal(record.special_liab.replace(',', ''))
-                cred_limit   = Decimal(record.cred_limit.replace(',', '')) * 1000
+                open_del     = self.__parse_number(record.open_del) * 1000
+                receivables  = self.__parse_number(record.receivables)
+                special_liab = self.__parse_number(record.special_liab)
+                cred_limit   = self.__parse_number(record.cred_limit) * 1000
 
                 saldo = receivables + special_liab
                 available = cred_limit - (saldo + open_del)
