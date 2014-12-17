@@ -264,6 +264,7 @@ class HtmlFormatter(object):
         """Transform records data in place."""
         for section in data.sections:
             for record in section.records:
+                credit_value = self.__parse_number(record.credit_value)
                 open_del     = self.__parse_number(record.open_del) * 1000
                 receivables  = self.__parse_number(record.receivables)
                 special_liab = self.__parse_number(record.special_liab)
@@ -273,10 +274,11 @@ class HtmlFormatter(object):
                 available = cred_limit - (saldo + open_del)
 
                 # ',' is thousands delimiter
-                record.open_del   = "{:,}".format(open_del)
-                record.saldo      = "{:,}".format(saldo)
-                record.cred_limit = "{:,}".format(cred_limit)
-                record.available  = "{:,}".format(available)
+                record.credit_value = "{:,}".format(credit_value)
+                record.open_del     = "{:,}".format(open_del)
+                record.saldo        = "{:,}".format(saldo)
+                record.cred_limit   = "{:,}".format(cred_limit)
+                record.available    = "{:,}".format(available)
 
 
     def format(self, data, fw):
