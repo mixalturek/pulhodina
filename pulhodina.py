@@ -273,10 +273,10 @@ class HtmlFormatter(object):
                 available = cred_limit - (saldo + open_del)
 
                 # ',' is thousands delimiter
-                record.open_del   = "{:,}".format(open_del).rstrip('0').rstrip('.')
-                record.saldo      = "{:,}".format(saldo).rstrip('0').rstrip('.')
-                record.cred_limit = "{:,}".format(cred_limit).rstrip('0').rstrip('.')
-                record.available  = "{:,}".format(available).rstrip('0').rstrip('.')
+                record.open_del   = "{:,}".format(open_del)
+                record.saldo      = "{:,}".format(saldo)
+                record.cred_limit = "{:,}".format(cred_limit)
+                record.available  = "{:,}".format(available)
 
 
     def format(self, data, fw):
