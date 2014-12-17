@@ -424,7 +424,11 @@ def format_multiple_files(args, file_names):
     for file in file_names:
         input_path = os.path.join(args.input_dir, file)
         output_path = os.path.join(args.output_dir, file)
-        output_path = re.sub(r'[^.]+$', 'html', output_path)
+
+        if file.rfind(".") == -1:
+            output_path += ".html"
+        else:
+            output_path = re.sub(r'[^.]+$', 'html', output_path)
 
         format_one_file(input_path, output_path, account_owners)
 
