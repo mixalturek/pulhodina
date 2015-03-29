@@ -89,6 +89,13 @@ def parse_arguments(argv):
     )
 
     parser.add_argument(
+            '-d', '--decimal-mark',
+            dest="decimal_mark",
+            help='separator of integer and decimal part in numbers',
+            required=True
+    )
+
+    parser.add_argument(
             '-i', '--in',
             metavar='DIR',
             dest='input_dir',
@@ -228,30 +235,22 @@ class Parser(object):
 class HtmlFormatter(object):
     """Format table in a file to HTML form."""
 
-    def __init__(self, account_owners, mugabe):
+    def __init__(self, account_owners, mugabe, decimal_mark):
         """Constructor."""
         self.account_owners = account_owners
         self.mugabe = mugabe
+        self.decimal_mark = decimal_mark
 
 
     def __parse_number(self, str):
         """Parse number with autodetection of its format."""
         str = str.strip()
-
-        if re.match(r'^-?\d+$', str):
-            # 42
-            updated = str
-        elif re.match(r'^-?(\d+,)*\d+\.\d+$', str):
-            # 42.30
-            # 62,297.27
-            updated = str.replace(',', '')
-        elif re.match(r'^-?(\d+ )*\d+,\d+$', str):
-            # 42,30
-            # 62 297,27
-            updated = str.replace(' ', '').replace(',', '.')
-        else:
-            print('WARNING: Unrecognized number format:', str, file=sys.stderr)
-            updated = str
+        updated = str
+        updated = updated.replace(self.decimal_mark, 'DECMARK')
+        updated = updated.replace(' ', '')
+        updated = updated.replace('.', '')
+        updated = updated.replace(',', '')
+        updated = updated.replace('DECMARK', '.')
 
         try:
             return decimal.Decimal(updated)
@@ -419,7 +418,7 @@ def get_files_in_directory(dir):
 
 ###############################################################################
 
-def format_one_file(input_path, output_path, account_owners, mugabe):
+def format_one_file(input_path, output_path, account_owners, mugabe, decimal_mark):
     """Format a file."""
     with open(input_path, mode='r', encoding=INPUT_FILE_ENCODING) as fr:
         input_lines = fr.readlines()
@@ -427,7 +426,7 @@ def format_one_file(input_path, output_path, account_owners, mugabe):
     parser = Parser()
     data_file = parser.parse(input_lines)
 
-    formatter = HtmlFormatter(account_owners, mugabe)
+    formatter = HtmlFormatter(account_owners, mugabe, decimal_mark)
     formatter.transform_in_place(data_file)
 
     with open(output_path, mode='w', encoding=FILES_ENCODING) as fw:
@@ -472,7 +471,7 @@ def format_multiple_files(args, file_names):
         else:
             output_path = re.sub(r'[^.]+$', 'html', output_path)
 
-        format_one_file(input_path, output_path, account_owners, args.mugabe)
+        format_one_file(input_path, output_path, account_owners, args.mugabe, args.decimal_mark)
 
 
 ###############################################################################
